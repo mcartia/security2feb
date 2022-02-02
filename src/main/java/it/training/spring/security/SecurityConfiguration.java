@@ -39,6 +39,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .headers().frameOptions().disable()
                 // -----------------------------------------
                 .and().authorizeRequests()
+                .antMatchers("/actuator/**")
+                .hasRole("ADMIN")
                 .antMatchers("/**")
                 .hasRole("USER")
                 .and().formLogin().permitAll()

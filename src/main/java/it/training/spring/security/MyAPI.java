@@ -1,5 +1,7 @@
 package it.training.spring.security;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.security.RolesAllowed;
+import java.security.Principal;
 
 @RestController
 @RequestMapping("/api")
@@ -22,13 +25,15 @@ public class MyAPI {
     @Autowired
     PasswordEncoder passwordEncoder;
 
+    Logger logger = LoggerFactory.getLogger(this.getClass().getName());
+
     @GetMapping("/public/hello")
     public String hello() {
         return "Hello, World!";
     }
 
     @GetMapping("/auth/info")
-    public Authentication authInfo() {
+    public Authentication authInfo(Principal principal) {
         return SecurityContextHolder.getContext().getAuthentication();
     }
 
@@ -55,5 +60,17 @@ public class MyAPI {
             repository.save(cu);
             return new ResponseEntity<CustomUser>(cu, HttpStatus.OK);
         } else return new ResponseEntity<CustomUser>(HttpStatus.NOT_FOUND);
+    }
+
+    @GetMapping("/testlog")
+    public String testLog() {
+
+        logger.error("test ERROR...");
+        logger.warn("test WARN...");
+        logger.info("test INFO...");
+        logger.debug("test DEBUG...");
+        logger.trace("test TRACE...");
+
+        return "OK";
     }
 }
