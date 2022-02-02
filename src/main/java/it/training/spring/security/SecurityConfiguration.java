@@ -9,6 +9,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -49,13 +50,18 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     public void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.inMemoryAuthentication()
                 .passwordEncoder(passwordEncoder())
-                .withUser("memuser")
+                .withUser("simpleuser")
                 .password(passwordEncoder().encode("12345678"))
-                .roles("USER");
+                .roles("USER").and()
+                .withUser("admin")
+                .password(passwordEncoder().encode("passw0rd"))
+                .roles("USER","ADMIN");
 
         auth.jdbcAuthentication()
                 .dataSource(dataSource)
-                .passwordEncoder(passwordEncoder());
+                .passwordEncoder(passwordEncoder())
+                .usersByUsernameQuery("SELECT USER_NAME, PASSWORD, ENABLED FROM CUSTOM_USER WHERE USER_NAME=?")
+                .authoritiesByUsernameQuery("SELECT CUSTOM_USER_USER_NAME, AUTHORITIES FROM CUSTOM_USER_AUTHORITIES WHERE CUSTOM_USER_USER_NAME=?");
                 /*.withDefaultSchema()
                 .withUser("dbuser")
                 .password(passwordEncoder().encode("12345678"))
@@ -64,7 +70,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return NoOpPasswordEncoder.getInstance();
+        return new BCryptPasswordEncoder();
     }
 
 }
